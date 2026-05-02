@@ -33,7 +33,10 @@ def summarize(news_text):
     url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY
     response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]})
     data = response.json()
+    if "candidates" in data:
     return data["candidates"][0]["content"]["parts"][0]["text"]
+else:
+    return "⚠️ خطأ في Gemini: " + str(data)
 
 def send_telegram(message):
     url = "https://api.telegram.org/bot" + TELEGRAM_TOKEN + "/sendMessage"
