@@ -1,11 +1,10 @@
- import os
+import os
 import requests
 import feedparser
 import schedule
 import time
 from datetime import datetime
 
-# ========== الإعدادات ==========
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
@@ -23,36 +22,21 @@ def get_news():
             for entry in feed.entries[:5]:
                 title = entry.get("title", "")
                 summary = entry.get("summary", "")[:500]
-                articles.append(f"- {title}: {summary}")
+                articles.append("- " + title + ": " + summary)
         except Exception as e:
-            print(f"خطأ في RSS: {e}")
+            print("خطأ في RSS: " + str(e))
     return "\n".join(articles[:10])
 
 def summarize(news_text):
-    prompt = f"""لخّص هذه الأخبار بالعربية:
-- ركّز فقط على أدوات الذكاء الاصطناعي الجديدة
-- تجاهل الأخبار العامة والاستثمارية
-- صنّف كل خبر: 🔥 عالي جدًا / ⚡ متوسط / 💤 ضعيف
-- لا تزد عن 5 أخبار
-
-التنسيق:
-📊 ملخص أدوات الذكاء الاصطناعي ليوم {datetime.now().strftime('%Y-%m-%d')}:
-
-1. اسم الأداة
-- ماذا حدث:
-- الفائدة العملية:
-- التقييم:
-
-الأخبار:
-{news_text}"""
-
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    today = datetime.now().strftime("%Y-%m-%d")
+    prompt = "لخّص هذه الأخبار بالعربية:\n- ركّز فقط على أدوات الذكاء الاصطناعي الجديدة\n- تجاهل الأخبار العامة\n- صنّف كل خبر: عالي جدا / متوسط / ضعيف\n- لا تزد عن 5 أخبار\n\nالأخبار:\n" + news_text
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY
     response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]})
     data = response.json()
     return data["candidates"][0]["content"]["parts"][0]["text"]
 
 def send_telegram(message):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    url = "https://api.telegram.org/bot" + TELEGRAM_TOKEN + "/sendMessage"
     requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message})
 
 def daily_job():
