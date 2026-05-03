@@ -29,7 +29,7 @@ def get_news():
 
 def summarize(news_text):
     prompt = "لخّص بالعربية وركّز على أدوات AI فقط، 5 أخبار كحد أقصى:\n" + news_text
-    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=" + GEMINI_API_KEY
     response = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]})
     data = response.json()
     print(str(data))
